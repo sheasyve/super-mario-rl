@@ -1,6 +1,8 @@
 services:
   mario:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: mario
     environment:
       - DISPLAY=$DISPLAY

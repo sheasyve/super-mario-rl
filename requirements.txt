@@ -1,0 +1,8 @@
+# Poor man's pyproject.toml.
+
+lib/Shimmy
+gym_super_mario_bros
+matplotlib
+nes_py
+pyglet
+stable_baselines3
