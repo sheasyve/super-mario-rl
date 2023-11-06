@@ -7,3 +7,4 @@ nes_py
 opencv-python
 pyglet
 stable_baselines3
+tensorboard

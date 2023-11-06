@@ -124,7 +124,7 @@ model = PPO(
 )  # EXPERIMENT: Try using 'MlpPolicy' or "MultiInputPolicy" instead
 # Train the AI model, this is where the AI model starts to learn
 model.learn(
-    total_timesteps=10000, callback=callback
+    total_timesteps=10, callback=callback
 )  # EXPERIMENT: train for longer periods of time to see how it improves over that time span
 model.save("test_baseline")
 
