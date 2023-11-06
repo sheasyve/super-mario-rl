@@ -12,3 +12,6 @@ services:
       - type: bind
         source: ../src
         target: /opt/mario/src
+      - type: bind
+        source: ../archive
+        target: /opt/mario/archive
