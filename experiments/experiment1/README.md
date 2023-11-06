@@ -8,7 +8,7 @@ Our time was mostly spent setting things up, we didn't get to any proper reinfor
 
 **Time:** ~3 hours.
 
-This might be unnecessary since Shea supposedly had things working, but our setup wasn't functional due to an issue with specifying a seed for resetting the game environment not being compatible with JoypadSpace. We fixed it by adding a try/except block in `lib/Shimmy/shimmy/openai_gym_compatibility.py/GymV26CompatibilityV0/reset`. I think we spent roughly 3 hours on this.
+This might be unnecessary since Shea supposedly had things working, but our setup wasn't functional due to an issue with specifying a seed for resetting the game environment not being compatible with JoypadSpace. We fixed it by adding a try/except block in `lib/Shimmy/shimmy/openai_gym_compatibility.py/GymV26CompatibilityV0/reset`.
 
 ### Docker Environment
 
