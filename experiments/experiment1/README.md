@@ -24,4 +24,7 @@ We're running into some issues with performance, but we're trying to do experime
 
 ## Recommendations for Next Experiments
 
-Getting things to run faster seems like a priority. Other than that, messing with the reward function, input features, action space and PPO hyperparameters are good bets for where to go next. I think at this stage we should probably focus more on reward function/input features/action space.
+1. The number one thing is probably organising the code. It's super messy right now, we've just scraped together a functioning prototype. Making easy entrypoints to mess with parameters would be super nice.
+2. Getting things to run faster seems like a priority.
+3. Messing with the reward function, input features, action space. No particular order that I can think of but I think these all need to be done.
+4. PPO hyperparameters are good bets for where to go next. I think at this stage we should probably focus more on reward function/input features/action space.
