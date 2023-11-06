@@ -1,38 +1,40 @@
 #1.SETUP MARIO
 # Import the game
 import gym_super_mario_bros
-# Import the Joypad wrapper
-from nes_py.wrappers import JoypadSpace
 # Import the SIMPLIFIED controls
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
+# Import the Joypad wrapper
+from nes_py.wrappers import JoypadSpace
+
 # Setup game
 
-env = gym_super_mario_bros.make('SuperMarioBros-v0', apply_api_compatibility=True, render_mode="human")
-env = JoypadSpace(env, SIMPLE_MOVEMENT)
-# Create a flag - restart or not
-done = True
+# env = gym_super_mario_bros.make('SuperMarioBros-v0', apply_api_compatibility=True, render_mode="rgb_array")
+# env = JoypadSpace(env, SIMPLE_MOVEMENT)
+# # Create a flag - restart or not
+# done = True
 
-for step in range(100000):
-# Start the game to begin with
-    if done:
-        # Start the game
-        env.reset()
-    # Do actions
-    observation, reward, terminated, truncated, info = env.step(env.action_space.sample())
-    # Show the game on the screen
-    done = terminated or truncated
-    env.render()
-# Close the game
-env.close()
+# for step in range(100000):
+# # Start the game to begin with
+#     if done:
+#         # Start the game
+#         env.reset()
+#     # Do actions
+#     observation, reward, terminated, truncated, info = env.step(env.action_space.sample())
+#     # Show the game on the screen
+#     done = terminated or truncated
+#     env.render()
+# # Close the game
+# env.close()
 
 #2.PREPROCESS ENVIRONMENT
 # Install pytorch
 # Import Frame Stacker Wrapper and GrayScaling Wrapper
 from gym.wrappers import GrayScaleObservation
-# Import Vectorization Wrappers
-from stable_baselines3.common.vec_env import VecFrameStack, DummyVecEnv
 # Import Matplotlib to show the impact of frame stacking
 from matplotlib import pyplot as plt
+# Import Vectorization Wrappers
+from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack
+
 # 1. Create the base environment
 env = gym_super_mario_bros.make('SuperMarioBros-v0')
 # 2. Simplify the controls 
@@ -53,11 +55,14 @@ plt.show()
 
 #3.TRAIN THE MODEL
 # Import os for file path management
-import os 
+import os
+
 # Import PPO for algos
 from stable_baselines3 import PPO
 # Import Base Callback for saving models
 from stable_baselines3.common.callbacks import BaseCallback
+
+
 class TrainAndLoggingCallback(BaseCallback):
 
     def __init__(self, check_freq, save_path, verbose=1):

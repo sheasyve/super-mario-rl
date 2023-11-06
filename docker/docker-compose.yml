@@ -1,0 +1,12 @@
+services:
+  mario:
+    build: .
+    container_name: mario
+    environment:
+      - DISPLAY=$DISPLAY
+    stdin_open: true
+    tty: true
+    volumes:
+      - type: bind
+        source: ../src
+        target: /opt/mario/src
