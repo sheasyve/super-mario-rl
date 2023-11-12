@@ -1,0 +1,17 @@
+services:
+  mario:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: mario
+    environment:
+      - DISPLAY=$DISPLAY
+    stdin_open: true
+    tty: true
+    volumes:
+      - type: bind
+        source: ../src
+        target: /opt/mario/src
+      - type: bind
+        source: ../archive
+        target: /opt/mario/archive
