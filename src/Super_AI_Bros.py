@@ -123,7 +123,7 @@ model = PPO(
     env,
     verbose=1,
     tensorboard_log=LOG_DIR,
-    learning_rate=0.000001,  # EXPERIMENT: Adjust this learning rate
+    learning_rate=0.000005,  # EXPERIMENT: Adjust this learning rate
     n_steps=512,
 )  # EXPERIMENT: Try using 'MlpPolicy' or "MultiInputPolicy" instead
 # Train the AI model, this is where the AI model starts to learn
