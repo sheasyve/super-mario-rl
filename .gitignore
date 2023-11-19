@@ -1,5 +1,7 @@
+# In case anyone is using virtual environments.
+.venv/*
+# So we don't automatically nuke the repo with Mario models.
 archive/*
-
 # This is Isaac's nix packaging junk. Just keeping it out of the way.
 .envrc
 .direnv/*
