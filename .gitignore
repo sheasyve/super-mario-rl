@@ -1,1 +1,6 @@
 archive/*
+
+# This is Isaac's nix packaging junk. Just keeping it out of the way.
+.envrc
+.direnv/*
+shell.nix
