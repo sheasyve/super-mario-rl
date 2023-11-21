@@ -10,14 +10,6 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import BaseCallback
 CHECKPOINT_DIR,LOG_DIR = "./train/", "./logs/"
 
-def plot(state):
-    #Not sure what this is plotting
-    plt.figure(figsize=(20, 16))
-    for idx in range(state.shape[3]):
-        plt.subplot(1,4,idx+1)
-        plt.imshow(state[0][:,:,idx])
-    plt.show()
-
 class TrainAndLoggingCallback(BaseCallback):
     #Setup model saving callback
     def __init__(self, check_freq, save_path, verbose=1):
@@ -34,6 +26,14 @@ class TrainAndLoggingCallback(BaseCallback):
             )
             self.model.save(model_path)
         return True
+
+def plot(state):
+    #Not sure what this is plotting
+    plt.figure(figsize=(20, 16))
+    for idx in range(state.shape[3]):
+        plt.subplot(1,4,idx+1)
+        plt.imshow(state[0][:,:,idx])
+    plt.show()
 
 def env_setup():
     #Set up Environment
