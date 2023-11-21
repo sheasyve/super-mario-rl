@@ -4,12 +4,7 @@ from nes_py.wrappers import JoypadSpace
 from gym.wrappers import GrayScaleObservation
 from matplotlib import pyplot as plt
 from stable_baselines3.common.evaluation import evaluate_policy
-from stable_baselines3.common.vec_env import (
-    DummyVecEnv,
-    SubprocVecEnv,
-    VecFrameStack,
-    VecNormalize,
-)
+from stable_baselines3.common.vec_env import (DummyVecEnv,SubprocVecEnv,VecFrameStack,VecNormalize)
 import os
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import BaseCallback
