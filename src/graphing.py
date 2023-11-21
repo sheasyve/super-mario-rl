@@ -36,7 +36,6 @@ def extract(filename,approx_kl,entropy_loss,explained_variance,loss,policy_gradi
             policy_gradient_loss.append(float(re.findall('-?\d+(?:\.\d+)?', lines[15+ addition])[0]))
             value_loss.append(float(re.findall('-?\d+(?:\.\d+)?', lines[16+ addition])[0]))
         
-
 def plot(x_data,y_data,y_data2,label1,label2,x_label,y_label,title):        
     fig, ax = plt.subplots() 
     ax.set_xlabel(x_label)
@@ -50,11 +49,11 @@ def plot(x_data,y_data,y_data2,label1,label2,x_label,y_label,title):
 def main():
     iterations = [i for i in range(1,40)]
     #Supply filenames
-    filename,approx_kl,entropy_loss,explained_variance,loss,policy_gradient_loss,value_loss = 'run_logs/rundata5.txt',[],[],[],[],[],[]
-    filename2,approx_kl2,entropy_loss2,explained_variance2,loss2,policy_gradient_loss2,value_loss2 = 'run_logs/rundata6.txt',[],[],[],[],[],[]
+    filename,approx_kl,entropy_loss,explained_variance,loss,policy_gradient_loss,value_loss = '../run_logs/rundata1.txt',[],[],[],[],[],[]
+    filename2,approx_kl2,entropy_loss2,explained_variance2,loss2,policy_gradient_loss2,value_loss2 = '../run_logs/rundata2.txt',[],[],[],[],[],[]
     #Extract data
     extract(filename,approx_kl,entropy_loss,explained_variance,loss,policy_gradient_loss,value_loss,19)
-    extract(filename2,approx_kl2,entropy_loss2,explained_variance2,loss2,policy_gradient_loss2,value_loss2,39)
+    extract(filename2,approx_kl2,entropy_loss2,explained_variance2,loss2,policy_gradient_loss2,value_loss2,19)
 
     #Plot data
     #This could be much shorter and better code if it was in a function, but alas there are only so many hours in the day.
