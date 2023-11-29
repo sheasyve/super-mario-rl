@@ -6,5 +6,5 @@ matplotlib
 nes_py
 opencv-python
 pyglet
-stable_baselines3
+stable_baselines3[extra]
 tensorboard

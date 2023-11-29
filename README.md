@@ -20,3 +20,9 @@ This is our group semester project for SENG 474: Data Mining. Our goal is to exp
    - **MacOS:** Apparently `xcode-select --install` works. I wouldn't know, I'm not a mac user.
 3. Launch the environment by navigating to the repository root and running `make buc`.
 4. When you're done working in the environment, run `exit` to leave it. Then, run `make down` from the repository root to shut down the environment. _If you don't shut the environment down, it will run in the background and consume resources. The only reason you want this is if you're currently running experiments in the background._
+
+### Notes
+
+- To run project without Docker I recomend using a python [venv](https://docs.python.org/3/library/venv.html) and installing dependencies with `pip -r requirements.txt`
+- To utilize your GPU install a cuda version of [pytorch](https://pytorch.org/get-started/locally/)
+- To watch the model as it trains set render_mode to `human` in env_setup(), this will add a conciderable amount of training time so it is recomended to leave it set to `rgb_array`

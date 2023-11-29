@@ -39,9 +39,11 @@ def view_initial_images(env):
     plt.show()
 
 def env_setup():
-    #Set up Environment
-    env = gym_super_mario_bros.make("SuperMarioBros-v0", apply_api_compatibility=True, render_mode="rgb_array") # render_mode="human"
-    #env = MonitorWrapper(env)
+    # Set up Environment
+    # Set render_mode to 'human' to display the model on screen as it learns
+    # Set render_mode to 'rgb_array' for large increase in training speed (40% in my case)
+    env = gym_super_mario_bros.make("SuperMarioBros-v0", apply_api_compatibility=True, render_mode='rgb_array')
+    # env = MonitorWrapper(env)
     env = JoypadSpace(env, COMPLEX_MOVEMENT)
     env = ResizeObservation(env, 64)
     env = GrayScaleObservation(env, keep_dim=True)
@@ -51,7 +53,6 @@ def env_setup():
     return env
 
 def policy(env,callback, filename="archive/temp.model", learn=False, learning_rate=0.0001):
-    #Set up and
     model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=LOG_DIR,
         learning_rate=learning_rate,# EXPERIMENT:Adjust this learning rate. So far we have found .0001 to be best.
         n_steps=512)
@@ -61,13 +62,13 @@ def policy(env,callback, filename="archive/temp.model", learn=False, learning_ra
     return model
 
 def train(model_name, env, callback, iterations_per_training_interval=3, training_iterations=5, test_steps=512*3):
-    #Trains a given model for iterations_per_training_interval itrerations, then tests the model and records the average reward.
-    #Repeats this process training_iterations times. 
+    # Trains a given model for iterations_per_training_interval itrerations, then tests the model and records the average reward.
+    # Repeats this process training_iterations times. 
     rewards = []
     for i in range(training_iterations):
         # Load the model
         model = PPO.load("./" + model_name, env=env)
-        model.learn(total_timesteps=512 * iterations_per_training_interval, callback=callback) 
+        model.learn(total_timesteps=512 * iterations_per_training_interval, callback=callback, progress_bar=True) 
         model.save(model_name)
         
         # Test the model and record the average reward
@@ -77,8 +78,6 @@ def train(model_name, env, callback, iterations_per_training_interval=3, trainin
             action, _ = model.predict(state)
             state, reward, done, info = env.step(action)   
             total_rewards += reward
-                
-            env.render()
             i += 1
         avg_reward = (total_rewards/test_steps)[0]
         rewards.append(avg_reward)
@@ -94,7 +93,7 @@ def plot(rewards, iterations_per_training_interval, training_iterations):
     plt.xlabel("Iteration number", color="black", size=28)  
     plt.ylabel("Average reward", color="black", size=28)
     plt.plot(x_ticks, rewards, marker='o')
-    #plt.savefig("./Figures/" + model_name)
+    # plt.savefig("./Figures/" + model_name)
     plt.show()
     
 def main():
@@ -109,15 +108,17 @@ def main():
     learning_rate = 0.0001
 
     # Create (and save) the initial model. Change "learn" to "True" if you want to skip the plotting step and train it normally
+    # Set display=True to render the model as it trains, this will introduce nontrivial slowdown.
     model = policy(env,callback, filename=fn, learn=False, learning_rate=learning_rate)
 
     # Train, and obtain average rewards as iterations increase. Then plot these rewards
-    rewards = train(fn, env, callback, training_iterations=training_iterations, iterations_per_training_interval=iterations_per_training_interval)
+    rewards = train(fn, env, callback, training_iterations=training_iterations,
+                     iterations_per_training_interval=iterations_per_training_interval)
     plot(rewards, iterations_per_training_interval, training_iterations)
 
     # Perform an extensive test after model has been fully trained
-    #mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, deterministic=True)#Evaluate model to get training rewards
-    #print(f"mean_reward={mean_reward:.2f} +/- {std_reward}")
+    # mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, deterministic=True)#Evaluate model to get training rewards
+    # print(f"mean_reward={mean_reward:.2f} +/- {std_reward}")
     
 if __name__ == "__main__":
     main()
