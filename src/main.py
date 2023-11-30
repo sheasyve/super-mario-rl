@@ -108,7 +108,7 @@ def plot(rewards, iterations_per_training_interval, training_iterations):
 def main():
     parser = argparse.ArgumentParser(description='Train RL models for Super Mario')
     parser.add_argument('-m', '--mode', type=str, default='continious', metavar='', help='continious | iterative')
-    parser.add_argument('-f', '--filename', type=str, metavar='', default='archive/templmodel', help='Filename to begin training model with. Recommended for continious mode.')
+    parser.add_argument('-f', '--filename', type=str, metavar='', default='archive/inital_model', help='Filename to begin training model with. Recommended for continious mode.')
     parser.add_argument('-r', '--random', action='store_true', help='Train the model with stage 1-1 and 4 random level combinations. From world 1-8 and stage 1-4')
     parser.add_argument('-tr', '--truerandom', action='store_true', help='Train the model with a random stage at every death and reset')
     args = parser.parse_args()
