@@ -18,9 +18,10 @@ from stable_baselines3.common.utils import set_random_seed
 CHECKPOINT_DIR,LOG_DIR = "./train/", "./logs/"
 # Set render_mode to 'human' to display the model on screen as it learns
 # Set render_mode to 'rgb_array' for large increase in training speed (40% in my case)
-# render_mode = 'human' 
-render_mode = 'rgb_array' 
-processes = 1 #How many threads. 1 for single threaded.
+render_mode = 'human' 
+# render_mode = 'rgb_array'
+# default will change if -mp flag called
+processes = 1 
 
 class TrainAndLoggingCallback(BaseCallback):
     #Setup model saving callback
@@ -49,31 +50,37 @@ def view_initial_images(env):
         plt.imshow(state[0][:,:,idx])
     plt.show()
 
-def make_env(stages,random,rank=0,seed = 0):
-    set_random_seed(seed)
-    if random:
-        env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode=render_mode)
-    else:
-        env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode=render_mode, stages=stages)
-    #env = MonitorWrapper(env)
-    JoypadSpace.reset = lambda self, **kwargs: self.env.reset(**kwargs)
-    env = JoypadSpace(env, COMPLEX_MOVEMENT)
-    env = ResizeObservation(env, 64)
-    env = GrayScaleObservation(env, keep_dim=True)
-    if processes != 1:
+def make_env(stages: list, random: bool, rank: int, seed: int = 0):
+    def _init():
+        # env =  gym_super_mario_bros.make("SuperMarioBros-v0", apply_api_compatibility=True, render_mode='human')
+        if random:
+            env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode=render_mode)
+        else:
+            env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode=render_mode, stages=stages)
+        # env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode='human')
         env.reset(seed=seed + rank)
-    return env
+        env = JoypadSpace(env, COMPLEX_MOVEMENT)
+        env = ResizeObservation(env, 64)
+        env = GrayScaleObservation(env, keep_dim=True)
+        return env
+    set_random_seed(seed)
+    return _init
 
-def env_setup(stages, random=False):
-    #Set up Environment
-    if processes == 1:#Single thread
-        env = make_env(stages,random)
+
+def env_setup(stages, random=False, multiproc=False):
+
+    if multiproc:
+        env = SubprocVecEnv([make_env(rank=i, stages=stages, random=random) for i in range(processes)])
+    else:
+        if random:
+            env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode=render_mode)
+        else:
+            env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode=render_mode, stages=stages)
+            # env = MonitorWrapper(env)
+        env = JoypadSpace(env, COMPLEX_MOVEMENT)
+        env = ResizeObservation(env, 64)
+        env = GrayScaleObservation(env, keep_dim=True)
         env = DummyVecEnv([lambda: env])
-    else:#Multithread
-        env = SubprocVecEnv(
-            [make_env(stages,random,i) for i in range(processes)],
-            start_method="fork",
-        )
     env = VecFrameStack(env, 4, channels_order="last")
     env = VecNormalize(env, training=True, norm_obs=True, norm_reward=True, clip_obs=10.0, clip_reward=10.0, gamma=0.99, epsilon=1e-08)
     return env
@@ -122,7 +129,7 @@ def plot(rewards, iterations_per_training_interval, training_iterations):
     # plt.savefig("./Figures/" + model_name)
     plt.show()
     
-def final_test(fn,env):
+def final_test(fn, env):
     #Renders the finished model playing a game of mario
     model = PPO.load("./" + fn, env=env)
     done = True
@@ -141,6 +148,8 @@ def parsing():
     parser.add_argument('-f', '--filename', type=str, metavar='', default='archive/templmodel', help='Filename to begin training model with. Recommended for continious mode.')
     parser.add_argument('-r', '--random', action='store_true', help='Train the model with stage 1-1 and 4 random level combinations. From world 1-8 and stage 1-4')
     parser.add_argument('-tr', '--truerandom', action='store_true', help='Train the model with a random stage at every death and reset')
+    parser.add_argument('-mp', '--multiproc', nargs='?', const=True, default=None, type= int,
+                        help='Enables multiprocesing based on detected number of cpu cores by default, pass a number to specify number of cpu cores manually (must be <= total detected cores)')
     args = parser.parse_args()
     return args
 
@@ -155,11 +164,19 @@ def stageing(args):
     return stages
 
 def main():
+    global processes
     args = parsing()
     stages = stageing(args)
-        
+    total_cpu_cores = os.cpu_count()
+    processes = int(total_cpu_cores / 2)
+    multiproc = False
+    if args.multiproc == True:
+        multiproc = True
+    if args.multiproc != None and args.multiproc != True:
+        processes = args.multiproc
+   
     # Set up environment
-    env = env_setup(stages=stages, random=args.truerandom) 
+    env = env_setup(stages=stages, random=args.truerandom, multiproc=multiproc) 
     #view_initial_images(env)
     callback = TrainAndLoggingCallback(check_freq=20000, save_path=CHECKPOINT_DIR)
 
