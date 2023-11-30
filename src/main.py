@@ -18,8 +18,8 @@ from stable_baselines3.common.utils import set_random_seed
 CHECKPOINT_DIR,LOG_DIR = "./train/", "./logs/"
 # Set render_mode to 'human' to display the model on screen as it learns
 # Set render_mode to 'rgb_array' for large increase in training speed (40% in my case)
-render_mode = 'human' 
-# render_mode = 'rgb_array'
+# render_mode = 'human' 
+render_mode = 'rgb_array'
 # default will change if -mp flag called
 processes = 1 
 
@@ -144,10 +144,10 @@ def final_test(fn, env):
 
 def parsing():
     parser = argparse.ArgumentParser(description='Train RL models for Super Mario')
-    parser.add_argument('-m', '--mode', type=str, default='continious', metavar='', help='continious | iterative')
-    parser.add_argument('-f', '--filename', type=str, metavar='', default='archive/templmodel', help='Filename to begin training model with. Recommended for continious mode.')
+    parser.add_argument('-f', '--filename', type=str, metavar='', default='archive/init_model', help='Filename to begin training model with. Recommended for continious mode.')
     parser.add_argument('-r', '--random', action='store_true', help='Train the model with stage 1-1 and 4 random level combinations. From world 1-8 and stage 1-4')
     parser.add_argument('-tr', '--truerandom', action='store_true', help='Train the model with a random stage at every death and reset')
+    parser.add_argument('-i', '--iterative', action='store_true', help='iterative mode')
     parser.add_argument('-mp', '--multiproc', nargs='?', const=True, default=None, type= int,
                         help='Enables multiprocesing based on detected number of cpu cores by default, pass a number to specify number of cpu cores manually (must be <= total detected cores)')
     args = parser.parse_args()
@@ -166,14 +166,15 @@ def stageing(args):
 def main():
     global processes
     args = parsing()
-    stages = stageing(args)
+    stages = stageing(args)    
     total_cpu_cores = os.cpu_count()
     processes = int(total_cpu_cores / 2)
     multiproc = False
+
     if args.multiproc == True:
         multiproc = True
     if args.multiproc != None and args.multiproc != True:
-        processes = args.multiproc
+        processes = args.multiproc if processes <= total_cpu_cores else total_cpu_cores
    
     # Set up environment
     env = env_setup(stages=stages, random=args.truerandom, multiproc=multiproc) 
