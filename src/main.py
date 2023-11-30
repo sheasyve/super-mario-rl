@@ -12,12 +12,15 @@ from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.vec_env import (DummyVecEnv,SubprocVecEnv,VecFrameStack,VecNormalize)
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3.common.utils import set_random_seed
+
 
 CHECKPOINT_DIR,LOG_DIR = "./train/", "./logs/"
 # Set render_mode to 'human' to display the model on screen as it learns
 # Set render_mode to 'rgb_array' for large increase in training speed (40% in my case)
 # render_mode = 'human' 
 render_mode = 'rgb_array' 
+processes = 1 #How many threads. 1 for single threaded.
 
 class TrainAndLoggingCallback(BaseCallback):
     #Setup model saving callback
@@ -46,17 +49,31 @@ def view_initial_images(env):
         plt.imshow(state[0][:,:,idx])
     plt.show()
 
-def env_setup(stages, random=False):
-    # Set up Environment
+def make_env(stages,random,rank=0,seed = 0):
+    set_random_seed(seed)
     if random:
         env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode=render_mode)
     else:
         env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode=render_mode, stages=stages)
-    # env = MonitorWrapper(env)
+    #env = MonitorWrapper(env)
+    JoypadSpace.reset = lambda self, **kwargs: self.env.reset(**kwargs)
     env = JoypadSpace(env, COMPLEX_MOVEMENT)
     env = ResizeObservation(env, 64)
     env = GrayScaleObservation(env, keep_dim=True)
-    env = DummyVecEnv([lambda: env])
+    if processes != 1:
+        env.reset(seed=seed + rank)
+    return env
+
+def env_setup(stages, random=False):
+    #Set up Environment
+    if processes == 1:#Single thread
+        env = make_env(stages,random)
+        env = DummyVecEnv([lambda: env])
+    else:#Multithread
+        env = SubprocVecEnv(
+            [make_env(stages,random,i) for i in range(processes)],
+            start_method="fork",
+        )
     env = VecFrameStack(env, 4, channels_order="last")
     env = VecNormalize(env, training=True, norm_obs=True, norm_reward=True, clip_obs=10.0, clip_reward=10.0, gamma=0.99, epsilon=1e-08)
     return env
@@ -105,22 +122,41 @@ def plot(rewards, iterations_per_training_interval, training_iterations):
     # plt.savefig("./Figures/" + model_name)
     plt.show()
     
-def main():
+def final_test(fn,env):
+    #Renders the finished model playing a game of mario
+    model = PPO.load("./" + fn, env=env)
+    done = True
+    state = env.reset()
+    for step in range(100000):
+        action, _ = model.predict(state)
+        if done:
+            env.reset()
+        observation, reward, done, info = env.step(action)
+        env.render()
+    env.close()
+
+def parsing():
     parser = argparse.ArgumentParser(description='Train RL models for Super Mario')
     parser.add_argument('-m', '--mode', type=str, default='continious', metavar='', help='continious | iterative')
-    parser.add_argument('-f', '--filename', type=str, metavar='', default='archive/inital_model', help='Filename to begin training model with. Recommended for continious mode.')
+    parser.add_argument('-f', '--filename', type=str, metavar='', default='archive/templmodel', help='Filename to begin training model with. Recommended for continious mode.')
     parser.add_argument('-r', '--random', action='store_true', help='Train the model with stage 1-1 and 4 random level combinations. From world 1-8 and stage 1-4')
     parser.add_argument('-tr', '--truerandom', action='store_true', help='Train the model with a random stage at every death and reset')
     args = parser.parse_args()
+    return args
 
+def stageing(args):
     stages = ['1-1']
-
     if args.random:
         for i in range(4):
             world = random.randint(1, 8)
             stage = random.randint(1, 4)
             stage_string = f'{world}-{stage}'
             stages.append(stage_string)
+    return stages
+
+def main():
+    args = parsing()
+    stages = stageing(args)
         
     # Set up environment
     env = env_setup(stages=stages, random=args.truerandom) 
@@ -139,10 +175,14 @@ def main():
     rewards = train(fn, env, callback, training_iterations=training_iterations,
                      iterations_per_training_interval=iterations_per_training_interval)
     plot(rewards, iterations_per_training_interval, training_iterations)
-
     # Perform an extensive test after model has been fully trained
     # mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, deterministic=True)#Evaluate model to get training rewards
     # print(f"mean_reward={mean_reward:.2f} +/- {std_reward}")
     
+    #final_test(fn,env)
+    
+    
 if __name__ == "__main__":
     main()
+
+    
