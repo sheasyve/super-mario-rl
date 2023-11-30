@@ -165,7 +165,7 @@ def main():
 
     # Test parameters
     fn = args.filename
-    training_iterations, iterations_per_training_interval = 100, 5
+    training_iterations, iterations_per_training_interval = 5, 100
     learning_rate = 0.0001
 
     # Create (and save) the initial model. Change "learn" to "True" if you want to skip the plotting step and train it normally
