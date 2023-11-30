@@ -1,5 +1,8 @@
+import random
 import gym_super_mario_bros
 import os
+import argparse
+
 from gym_super_mario_bros.actions import COMPLEX_MOVEMENT
 from nes_py.wrappers import JoypadSpace
 from gym.wrappers import GrayScaleObservation, ResizeObservation
@@ -9,7 +12,12 @@ from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.vec_env import (DummyVecEnv,SubprocVecEnv,VecFrameStack,VecNormalize)
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import BaseCallback
+
 CHECKPOINT_DIR,LOG_DIR = "./train/", "./logs/"
+# Set render_mode to 'human' to display the model on screen as it learns
+# Set render_mode to 'rgb_array' for large increase in training speed (40% in my case)
+# render_mode = 'human' 
+render_mode = 'rgb_array' 
 
 class TrainAndLoggingCallback(BaseCallback):
     #Setup model saving callback
@@ -38,11 +46,12 @@ def view_initial_images(env):
         plt.imshow(state[0][:,:,idx])
     plt.show()
 
-def env_setup():
+def env_setup(stages, random=False):
     # Set up Environment
-    # Set render_mode to 'human' to display the model on screen as it learns
-    # Set render_mode to 'rgb_array' for large increase in training speed (40% in my case)
-    env = gym_super_mario_bros.make("SuperMarioBros-v0", apply_api_compatibility=True, render_mode='rgb_array')
+    if random:
+        env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode=render_mode)
+    else:
+        env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode=render_mode, stages=stages)
     # env = MonitorWrapper(env)
     env = JoypadSpace(env, COMPLEX_MOVEMENT)
     env = ResizeObservation(env, 64)
@@ -97,18 +106,33 @@ def plot(rewards, iterations_per_training_interval, training_iterations):
     plt.show()
     
 def main():
+    parser = argparse.ArgumentParser(description='Train RL models for Super Mario')
+    parser.add_argument('-m', '--mode', type=str, default='continious', metavar='', help='continious | iterative')
+    parser.add_argument('-f', '--filename', type=str, metavar='', default='archive/templmodel', help='Filename to begin training model with. Recommended for continious mode.')
+    parser.add_argument('-r', '--random', action='store_true', help='Train the model with stage 1-1 and 4 random level combinations. From world 1-8 and stage 1-4')
+    parser.add_argument('-tr', '--truerandom', action='store_true', help='Train the model with a random stage at every death and reset')
+    args = parser.parse_args()
+
+    stages = ['1-1']
+
+    if args.random:
+        for i in range(4):
+            world = random.randint(1, 8)
+            stage = random.randint(1, 4)
+            stage_string = f'{world}-{stage}'
+            stages.append(stage_string)
+        
     # Set up environment
-    env = env_setup() 
+    env = env_setup(stages=stages, random=args.truerandom) 
     #view_initial_images(env)
     callback = TrainAndLoggingCallback(check_freq=20000, save_path=CHECKPOINT_DIR)
 
     # Test parameters
-    fn = "archive/testmodel1"
+    fn = args.filename
     training_iterations, iterations_per_training_interval = 100, 5
     learning_rate = 0.0001
 
     # Create (and save) the initial model. Change "learn" to "True" if you want to skip the plotting step and train it normally
-    # Set display=True to render the model as it trains, this will introduce nontrivial slowdown.
     model = policy(env,callback, filename=fn, learn=False, learning_rate=learning_rate)
 
     # Train, and obtain average rewards as iterations increase. Then plot these rewards
