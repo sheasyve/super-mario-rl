@@ -78,8 +78,7 @@ def make_env(stages: list, random: bool, rank: int, seed: int = 0):
             )
         # env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode='human')
         env.reset(seed=seed + rank)
-        env = JoypadSpace(env, COMPLEX_MOVEMENT)
-        # env = ResizeObservation(env, 64)
+        env = ResizeObservation(env, 64)
         env = GrayScaleObservation(env, keep_dim=True)
         return env
 
@@ -294,8 +293,9 @@ def main():
 
     # Set up environment
     env = env_setup(stages=stages, random=args.truerandom, multiproc=multiproc)
-    print(env)
-    exit()
+    import pdb
+
+    pdb.set_trace()
     # view_initial_images(env)
     callback = TrainAndLoggingCallback(check_freq=20000, save_path=CHECKPOINT_DIR)
 
