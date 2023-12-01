@@ -207,7 +207,7 @@ def plot(rewards, iterations_per_training_interval):
     plt.xlabel("Iteration number", color="black", size=28)
     plt.ylabel("Average reward", color="black", size=28)
     plt.plot(x_ticks, rewards, marker="o")
-    # plt.savefig("./Figures/" + model_name)
+    plt.savefig("./archive/plots/final.model")
     plt.show()
 
 
