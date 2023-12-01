@@ -194,7 +194,8 @@ def train(
     return rewards
 
 
-def plot(rewards, iterations_per_training_interval, training_iterations):
+def plot(rewards, iterations_per_training_interval):
+    training_iterations = len(rewards)
     x_ticks = list(range(0, training_iterations))
     fig, ax = plt.subplots()
     ax.plot(x_ticks, rewards)
@@ -315,7 +316,7 @@ def main():
         max_training_time=60,
     )
     model.save("final.model")
-    plot(rewards, iterations_per_training_interval, training_iterations)
+    plot(rewards, iterations_per_training_interval)
     # Perform an extensive test after model has been fully trained
     # mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, deterministic=True)#Evaluate model to get training rewards
     # print(f"mean_reward={mean_reward:.2f} +/- {std_reward}")
