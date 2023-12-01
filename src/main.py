@@ -313,9 +313,9 @@ def main():
         training_iterations=None,
         iterations_per_training_interval=iterations_per_training_interval,
         end_condition="time",
-        max_training_time=60,
+        max_training_time=3600,
     )
-    model.save("final.model")
+    model.save("archive/final.model")
     plot(rewards, iterations_per_training_interval)
     # Perform an extensive test after model has been fully trained
     # mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10, deterministic=True)#Evaluate model to get training rewards
