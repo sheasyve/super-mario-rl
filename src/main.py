@@ -293,9 +293,6 @@ def main():
 
     # Set up environment
     env = env_setup(stages=stages, random=args.truerandom, multiproc=multiproc)
-    import pdb
-
-    pdb.set_trace()
     # view_initial_images(env)
     callback = TrainAndLoggingCallback(check_freq=20000, save_path=CHECKPOINT_DIR)
 
