@@ -78,7 +78,7 @@ def make_env(stages: list, random: bool, rank: int, seed: int = 0):
             )
         # env = gym_super_mario_bros.make("SuperMarioBrosRandomStages-v0", apply_api_compatibility=True, render_mode='human')
         env.reset(seed=seed + rank)
-        # env = ResizeObservation(env, 64)
+        env = ResizeObservation(env, 128)
         env = GrayScaleObservation(env, keep_dim=True)
         return env
 
@@ -107,7 +107,7 @@ def env_setup(stages, random=False, multiproc=False):
             )
             # env = MonitorWrapper(env)
         env = JoypadSpace(env, COMPLEX_MOVEMENT)
-        # env = ResizeObservation(env, 64)
+        env = ResizeObservation(env, 128)
         env = GrayScaleObservation(env, keep_dim=True)
         env = DummyVecEnv([lambda: env])
     env = VecFrameStack(env, 4, channels_order="last")
