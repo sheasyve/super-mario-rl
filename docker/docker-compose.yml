@@ -10,8 +10,14 @@ services:
     tty: true
     volumes:
       - type: bind
-        source: ../src
-        target: /opt/mario/src
-      - type: bind
         source: ../archive
         target: /opt/mario/archive
+      - type: bind
+        source: ../logs
+        target: /opt/mario/logs
+      - type: bind
+        source: ../run_logs
+        target: /opt/mario/run_logs
+      - type: bind
+        source: ../src
+        target: /opt/mario/src
